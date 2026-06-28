@@ -1,0 +1,2 @@
+# This file ensures the public/ directory exists so the Docker build's
+# `COPY /app/public ./public` step succeeds even when no static assets are present.

@@ -17,7 +17,15 @@ const envSchema = z.object({
   NEXT_PUBLIC_SOCKET_URL: z.string().url().optional(),
   ANTHROPIC_API_KEY: z.string().optional(),
   RESEND_API_KEY: z.string().optional(),
-  EMAIL_FROM: z.string().email().optional(),
+  // Accepts a bare address ("a@b.com") or display-name form ("Name <a@b.com>").
+  EMAIL_FROM: z
+    .string()
+    .refine((v) => {
+      const match = v.match(/<([^>]+)>\s*$/);
+      const address = match ? match[1] : v;
+      return z.string().email().safeParse(address.trim()).success;
+    }, "EMAIL_FROM must be an email address or 'Name <email@domain>'")
+    .optional(),
   SENTRY_DSN: z.string().url().optional(),
   UPSTASH_REDIS_REST_URL: z.string().url().optional(),
   UPSTASH_REDIS_REST_TOKEN: z.string().optional(),

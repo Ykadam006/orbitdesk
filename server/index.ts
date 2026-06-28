@@ -5,6 +5,15 @@ import { verifySocketToken } from "../lib/socket-token";
 import { validateEnv } from "../lib/env";
 import { logger } from "../lib/logger";
 
+// Unlike the Next.js app, this standalone process does not auto-load .env.
+// Load it in development; in production the platform injects real env vars
+// and no .env file exists, so this is a no-op.
+try {
+  (process as { loadEnvFile?: (path?: string) => void }).loadEnvFile?.();
+} catch {
+  // No .env file present — rely on the environment-provided variables.
+}
+
 validateEnv();
 
 const prisma = new PrismaClient();

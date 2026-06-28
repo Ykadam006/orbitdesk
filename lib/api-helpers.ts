@@ -48,13 +48,15 @@ export function validateCsrf(req: Request): NextResponse | null {
 
 type RouteHandler<T = unknown> = (req: NextRequest, context: T) => Promise<NextResponse>;
 
-export function withErrorHandling<T>(handler: RouteHandler<T>): RouteHandler<T> {
+export function withErrorHandling<T>(
+  handler: RouteHandler<T>
+): (req: Request, context?: T) => Promise<NextResponse> {
   return async (req, context) => {
     try {
       const csrfError = validateCsrf(req);
       if (csrfError) return csrfError;
 
-      return await handler(req, context);
+      return await handler(req as NextRequest, context as T);
     } catch (error) {
       logger.error("API error", { error: String(error) });
       captureException(error, { path: req.url, method: req.method });

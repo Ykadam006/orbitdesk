@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { auth } from "@/lib/auth";
 import { POST } from "@/app/api/workspaces/join/route";
 
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+const mockAuth = auth as unknown as jest.Mock;
 
 function mockSession(userId: string) {
   mockAuth.mockResolvedValue({

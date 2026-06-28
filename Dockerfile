@@ -9,10 +9,9 @@ FROM base AS builder
 WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
-# prisma.config.ts requires DATABASE_URL; no live DB connection at build time
+# prisma.config.ts requires DATABASE_URL; this placeholder is only used at
+# build time (no live DB connection is made during generate/build).
 ENV DATABASE_URL="postgresql://build:build@127.0.0.1:5432/build"
-ENV AUTH_SECRET="docker-build-placeholder-secret-32chars"
-ENV AUTH_URL="http://localhost:3000"
 RUN npx prisma generate
 RUN npm run build
 

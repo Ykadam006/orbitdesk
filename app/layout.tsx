@@ -39,7 +39,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en" className="h-full" suppressHydrationWarning>
-      <body className={`${inter.className} min-h-full flex flex-col antialiased bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100`}>
+      <body
+        suppressHydrationWarning
+        className={`${inter.className} min-h-full flex flex-col antialiased bg-white text-gray-900 dark:bg-gray-950 dark:text-gray-100`}
+      >
         <ThemeProvider>
           <SessionProvider>
             <ToastProvider>

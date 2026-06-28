@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { GET, POST } from "@/app/api/cards/[cardId]/comments/route";
 import { NextRequest } from "next/server";
 
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+const mockAuth = auth as unknown as jest.Mock;
 
 function mockSession(userId: string) {
   mockAuth.mockResolvedValue({ user: { id: userId, name: "Test", email: "test@test.com" }, expires: "" } as ReturnType<typeof auth> extends Promise<infer T> ? T : never);

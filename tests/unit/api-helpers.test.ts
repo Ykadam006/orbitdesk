@@ -79,13 +79,13 @@ describe("validateCsrf", () => {
   });
 
   it("allows POST without origin/referer in test environment", () => {
-    process.env.NODE_ENV = "test";
+    (process.env as Record<string, string>).NODE_ENV = "test";
     const req = new Request("http://localhost", { method: "POST" });
     expect(validateCsrf(req)).toBeNull();
   });
 
   it("blocks POST without origin/referer in production", () => {
-    process.env.NODE_ENV = "production";
+    (process.env as Record<string, string>).NODE_ENV = "production";
     const req = new Request("http://localhost", { method: "POST" });
     const res = validateCsrf(req);
     expect(res?.status).toBe(403);

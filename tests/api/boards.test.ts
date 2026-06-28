@@ -3,7 +3,7 @@ import { auth } from "@/lib/auth";
 import { GET as listBoards, POST as createBoard } from "@/app/api/workspaces/[workspaceId]/boards/route";
 import { GET, PATCH, DELETE } from "@/app/api/boards/[boardId]/route";
 
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+const mockAuth = auth as unknown as jest.Mock;
 
 function mockSession(userId: string) {
   mockAuth.mockResolvedValue({

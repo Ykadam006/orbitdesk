@@ -1,4 +1,4 @@
-export const prisma = {
+const prisma = {
   user: { findUnique: jest.fn(), create: jest.fn(), update: jest.fn(), upsert: jest.fn(), delete: jest.fn(), findMany: jest.fn() },
   workspace: { findUnique: jest.fn(), findMany: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn(), count: jest.fn() },
   membership: { findUnique: jest.fn(), findMany: jest.fn(), create: jest.fn(), update: jest.fn(), delete: jest.fn(), count: jest.fn() },
@@ -19,5 +19,9 @@ export const prisma = {
   activityLog: { findMany: jest.fn(), create: jest.fn(), count: jest.fn() },
   passwordReset: { findUnique: jest.fn(), create: jest.fn(), delete: jest.fn(), deleteMany: jest.fn() },
   emailVerification: { findUnique: jest.fn(), create: jest.fn(), delete: jest.fn(), deleteMany: jest.fn() },
-  $transaction: jest.fn((fn: (tx: typeof prisma) => unknown) => fn(prisma)),
+  $transaction: jest.fn(),
 };
+
+prisma.$transaction.mockImplementation((fn: (tx: typeof prisma) => unknown) => fn(prisma));
+
+export { prisma };

@@ -3,16 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { requireMembership } from "@/lib/permissions";
 import { cardSchema } from "@/lib/validations";
 import {
-  paginatedResponse,
   parseJsonBody,
-  parsePagination,
   requireSession,
   unauthorized,
   validateAssignee,
   withErrorHandling,
 } from "@/lib/api-helpers";
 
-export const GET = withErrorHandling(async (req, { params }: { params: Promise<{ boardId: string }> }) => {
+export const GET = withErrorHandling(async (_req, { params }: { params: Promise<{ boardId: string }> }) => {
   const session = await requireSession();
   if (!session) return unauthorized();
 
@@ -25,24 +23,18 @@ export const GET = withErrorHandling(async (req, { params }: { params: Promise<{
 
   await requireMembership(session.user.id, board.workspaceId);
 
-  const { page, limit, skip } = parsePagination(req);
-  const where = { boardId };
+  // A Kanban board renders all columns and supports cross-column drag/drop,
+  // so it requires the complete card set rather than a paginated subset.
+  const cards = await prisma.card.findMany({
+    where: { boardId },
+    include: {
+      assignedTo: { select: { id: true, name: true, image: true } },
+      labels: true,
+    },
+    orderBy: { position: "asc" },
+  });
 
-  const [cards, total] = await Promise.all([
-    prisma.card.findMany({
-      where,
-      include: {
-        assignedTo: { select: { id: true, name: true, image: true } },
-        labels: true,
-      },
-      orderBy: { position: "asc" },
-      skip,
-      take: limit,
-    }),
-    prisma.card.count({ where }),
-  ]);
-
-  return paginatedResponse(cards, total, page, limit);
+  return NextResponse.json(cards);
 });
 
 export const POST = withErrorHandling(async (req, { params }: { params: Promise<{ boardId: string }> }) => {

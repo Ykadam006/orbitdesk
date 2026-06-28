@@ -4,7 +4,7 @@ import { GET } from "@/app/api/workspaces/[workspaceId]/members/route";
 import { DELETE } from "@/app/api/workspaces/[workspaceId]/members/[memberId]/route";
 import { PATCH as changeRole } from "@/app/api/workspaces/[workspaceId]/members/[memberId]/role/route";
 
-const mockAuth = auth as jest.MockedFunction<typeof auth>;
+const mockAuth = auth as unknown as jest.Mock;
 
 function mockSession(userId: string) {
   mockAuth.mockResolvedValue({
