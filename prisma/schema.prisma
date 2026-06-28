@@ -1,0 +1,160 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../app/generated/prisma"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id                 String              @id @default(cuid())
+  name               String?
+  email              String              @unique
+  password           String?
+  image              String?
+  emailVerified      DateTime?
+  passwordChangedAt  DateTime?
+  failedLoginAttempts Int                @default(0)
+  lockedUntil        DateTime?
+  memberships        Membership[]
+  cards              Card[]              @relation("AssignedCards")
+  comments           Comment[]
+  activities         ActivityLog[]
+  passwordResets     PasswordReset[]
+  emailVerifications EmailVerification[]
+  createdAt          DateTime            @default(now())
+  updatedAt          DateTime            @updatedAt
+}
+
+model EmailVerification {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model PasswordReset {
+  id        String   @id @default(cuid())
+  token     String   @unique
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+}
+
+model Workspace {
+  id          String        @id @default(cuid())
+  name        String
+  inviteCode  String        @unique
+  members     Membership[]
+  boards      Board[]
+  labels      Label[]
+  activities  ActivityLog[]
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Membership {
+  id          String    @id @default(cuid())
+  userId      String
+  workspaceId String
+  role        Role      @default(MEMBER)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@unique([userId, workspaceId])
+}
+
+model Board {
+  id          String    @id @default(cuid())
+  title       String
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  cards       Card[]
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+
+  @@index([workspaceId])
+}
+
+model Card {
+  id           String      @id @default(cuid())
+  title        String
+  description  String?
+  status       CardStatus  @default(TODO)
+  priority     Priority    @default(MEDIUM)
+  dueDate      DateTime?
+  position     Int         @default(0)
+  boardId      String
+  board        Board       @relation(fields: [boardId], references: [id], onDelete: Cascade)
+  assignedToId String?
+  assignedTo   User?       @relation("AssignedCards", fields: [assignedToId], references: [id], onDelete: SetNull)
+  comments     Comment[]
+  labels       Label[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+
+  @@index([boardId, status])
+}
+
+model Comment {
+  id        String   @id @default(cuid())
+  content   String
+  cardId    String
+  card      Card     @relation(fields: [cardId], references: [id], onDelete: Cascade)
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  @@index([cardId])
+}
+
+model Label {
+  id          String    @id @default(cuid())
+  name        String
+  color       String
+  workspaceId String
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  cards       Card[]
+
+  @@unique([workspaceId, name])
+}
+
+model ActivityLog {
+  id          String    @id @default(cuid())
+  action      String
+  userId      String
+  workspaceId String
+  cardId      String?
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdAt   DateTime  @default(now())
+
+  @@index([workspaceId, createdAt])
+}
+
+enum Role {
+  OWNER
+  ADMIN
+  MEMBER
+}
+
+enum CardStatus {
+  TODO
+  IN_PROGRESS
+  REVIEW
+  DONE
+}
+
+enum Priority {
+  LOW
+  MEDIUM
+  HIGH
+  URGENT
+}
